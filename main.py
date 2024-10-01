@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the image
-image_path = "new_imgs/IMG_3220.jpg"  # Change this to the path of your image
+image_path = "new_imgs/IMG_3224.jpg"  # Change this to the path of your image
 image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 # Apply a Gaussian blur to reduce noise and improve blob detection
