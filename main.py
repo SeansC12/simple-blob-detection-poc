@@ -2,12 +2,33 @@ import cv2
 import numpy as np
 
 # Load the image
-image_path = "new_imgs/IMG_3224.jpg"  # Change this to the path of your image
-image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image_path = "new_imgs/img3.jpg"  # Change this to the path of your image
+# image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image = cv2.imread(image_path)
 
 # Apply a Gaussian blur to reduce noise and improve blob detection
-blurred_image = cv2.GaussianBlur(image, (7, 7), 0)
-blurred_image = cv2.bitwise_not(blurred_image)
+# blurred_image = cv2.GaussianBlur(image, (7, 7), 0)
+# blurred_image = cv2.bitwise_not(blurred_image)
+
+brightness = -100
+contrast = 0
+image = np.int16(image)
+image = image * (contrast/127+1) - contrast + brightness
+image = np.clip(image, 0, 255)
+image = np.uint8(image)
+
+lower = np.array([0, 0, 0])
+upper = np.array([55, 55, 55])
+
+# Create mask to only select black
+thresh = cv2.inRange(image, lower, upper)
+
+# apply morphology
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20,20))
+morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+cv2.imshow("image", image)
+cv2.imshow("morph", morph)
 
 # Set up the blob detector with parameters tuned for pill detection
 params = cv2.SimpleBlobDetector_Params()
@@ -19,7 +40,7 @@ params.maxArea = 100000000  # Tuned to ignore overly large objects
 
 # Filter by circularity: Pills are often round or oval
 params.filterByCircularity = True
-params.minCircularity = 0.1  # Set lower to accommodate oval pills
+params.minCircularity = 0.6  # Set lower to accommodate oval pills
 
 # Filter by convexity: Pills typically have a convex shape
 params.filterByConvexity = True
@@ -33,20 +54,22 @@ params.minInertiaRatio = 0.1  # Allows detection of both circular and elongated 
 detector = cv2.SimpleBlobDetector_create(params)
 
 # Detect blobs (pills)
-keypoints = detector.detect(blurred_image)
+keypoints = detector.detect(morph)
 
 # Draw detected blobs as red circles
-# output_image = cv2.drawKeypoints(blurred_image, keypoints, np.array([]), (255, 0, 0),
+# output_image = cv2.drawKeypoints(morph, keypoints, np.array([]), (255, 0, 0),
 #                                  cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-def draw_keypoints(img, keypoints, color=(255, 255, 255)):
+def draw_keypoints(img, keypoints, color):
     for kp in keypoints:
         x, y = kp.pt
-        cv2.circle(img, (int(x), int(y)), color=color, radius=10, thickness=10) # you can change the radius and the thickness
+        cv2.circle(img, (int(x), int(y)), color=color, radius=10, thickness=3) # you can change the radius and the thickness
 
-draw_keypoints(blurred_image, keypoints, color=(0, 255, 255))
+print(len(keypoints))
+
+draw_keypoints(morph, keypoints, (255, 0, 0))
 
 # Show the output image with detected pills
-cv2.imshow("Detected Pills", blurred_image)
+cv2.imshow("Detected Pills", morph)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
