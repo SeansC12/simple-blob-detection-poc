@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the image
-image_path = "new_imgs/img4.jpg"  # Change this to the path of your image
+image_path = "pills.jpg"  # Change this to the path of your image
 # image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 image = cv2.imread(image_path)
 
@@ -67,4 +67,4 @@ def draw_keypoints(img, keypoints, color):
 print(len(keypoints))
 
 draw_keypoints(morph, keypoints, (255, 0, 0))
-cv2.imshow("annotated.jpg", morph)
+cv2.imwrite("annotated.jpg", morph)
