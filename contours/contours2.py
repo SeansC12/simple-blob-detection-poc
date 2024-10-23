@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
+from scipy import ndimage
 
 # Step 1: Preprocess - Thresholding (Normal for white capsules on black background)
-image = cv2.imread('imgs/area_not_working.jpg')
+image = cv2.imread('imgs/area_not_working6.jpg')
 
-brightness = -200
+brightness = -100
 contrast = 200
 image = np.int16(image)
 image = image * (contrast/127+1) - contrast + brightness
@@ -12,6 +13,7 @@ image = np.clip(image, 0, 255)
 image = np.uint8(image)
 
 image = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
+# image = ndimage.rotate(image, 45)
 
 cv2.imshow("original", image)
 
@@ -19,7 +21,7 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
 # Step 2: Morphological Operations (Opening - Erosion followed by Dilation)
-kernel = np.ones((5), np.uint8)
+kernel = np.ones((3), np.uint8)
 eroded = cv2.erode(thresh, kernel, iterations=2)
 dilated = cv2.dilate(eroded, kernel, iterations=3)
 
@@ -45,7 +47,7 @@ test_img = colored_image.copy()
 test_img[markers == -1] = [255, 0, 0]
 cv2.imshow("Watershed", test_img)
 
-# Step 5: Find the area of each capsule
+# Step 5: Find the area of each capsule0
 unique_labels = np.unique(markers)
 capsule_areas = []
 
