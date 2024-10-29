@@ -3,16 +3,17 @@ import numpy as np
 from scipy import ndimage
 
 # Step 1: Preprocess - Thresholding (Normal for white capsules on black background)
-image = cv2.imread('imgs/area_not_working7.jpg')
+image = cv2.imread('imgs/10.jpg')
 
-brightness = -100
-contrast = 200
+brightness = -200
+contrast = 100
 image = np.int16(image)
 image = image * (contrast/127+1) - contrast + brightness
 image = np.clip(image, 0, 255)
 image = np.uint8(image)
 
-image = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
+cv2.imshow("original", image)
+# image = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
 # image = ndimage.rotate(image, 45)
 
 cv2.imshow("original", image)
@@ -21,7 +22,7 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
 # Step 2: Morphological Operations (Opening - Erosion followed by Dilation)
-kernel = np.ones((3, 2), np.uint8)
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 3))
 eroded = cv2.erode(thresh, kernel, iterations=2)
 dilated = cv2.dilate(eroded, kernel, iterations=3)
 
